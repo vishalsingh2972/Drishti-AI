@@ -1,0 +1,16 @@
+# Frontend
+frontend/node_modules/
+frontend/.env
+frontend/build/
+frontend/dist/
+
+# Backend
+backend/venv/
+backend/__pycache__/
+*.pyc
+
+# Secrets
+.env
+
+# Models
+*.pt
