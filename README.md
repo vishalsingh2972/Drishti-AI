@@ -355,7 +355,6 @@ Deploy
 * Route planning with turn-by-turn navigation
 * Personalized obstacle prioritization
 * Haptic feedback support
-* Sarvam STT (Vaani) integration for Indian language speech recognition
 
 ---
 
