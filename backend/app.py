@@ -30,6 +30,7 @@ from depth import run_depth
 from narrate import build_scene_narration
 from voice import text_to_speech
 from chat import ask_groq
+from translate import translate_text
 
 app = FastAPI(title="Drishti AI Backend")
 
