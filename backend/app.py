@@ -18,7 +18,11 @@ import json
 import time
 import asyncio
 import os
+from dotenv import load_dotenv
 from concurrent.futures import ThreadPoolExecutor
+
+# Load environment variables from .env file (if present)
+load_dotenv()
 from functools import partial
 
 from detect import run_detection

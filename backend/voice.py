@@ -1,5 +1,5 @@
 """
-voice.py — Text-to-Speech (gTTS) + Speech-to-Text (Whisper)
+voice.py — Text-to-Speech (Sarvam TTS + gTTS fallback) + Speech-to-Text (Whisper)
 
 FIXES vs original:
   1. Browser records audio as audio/webm (Opus, 48kHz stereo).
@@ -10,14 +10,44 @@ FIXES vs original:
      (moved os.unlink into a finally block).
   3. Added fallback: if webm→wav conversion fails, try passing raw file
      directly (some browsers send audio/ogg which Whisper can handle).
+  4. Replaced gTTS with Sarvam TTS (Bulbul v1) for better Indian language
+     voice quality. Falls back to gTTS if Sarvam API fails.
 """
 
 import base64
 import io
+import json
 import tempfile
 import os
 import subprocess
+import requests
 from gtts import gTTS
+
+# ─────────────────────────────────────────
+# Sarvam TTS (Bulbul v1) — primary TTS engine
+# ─────────────────────────────────────────
+SARVAM_API_KEY = os.environ.get("SARVAM_API_KEY", "").strip()
+SARVAM_TTS_URL = "https://api.sarvam.ai/v1/tts"
+
+# Sarvam TTS language codes (ISO → Sarvam format)
+SARVAM_LANG_MAP = {
+    "en": "en-IN",
+    "hi": "hi-IN",
+    "ta": "ta-IN",
+    "te": "te-IN",
+    "kn": "kn-IN",
+    "ml": "ml-IN",
+}
+
+# gTTS language codes (fallback)
+GTTS_LANG_MAP = {
+    "en": "en",
+    "ta": "ta",
+    "hi": "hi",
+    "ml": "ml",
+    "kn": "kn",
+    "te": "te",
+}
 
 # Whisper is optional: if it's not installed (or fails to load) the rest of
 # the backend — detection, depth, narration, TTS, chat — must still start.
@@ -31,15 +61,6 @@ except Exception as e:
     print(f"⚠️ Whisper unavailable, voice transcription disabled: {e}")
     whisper_model = None
 
-GTTS_LANG_MAP = {
-    "en": "en",
-    "ta": "ta",
-    "hi": "hi",
-    "ml": "ml",
-    "kn": "kn",
-    "te": "te",
-}
-
 WHISPER_LANG_MAP = {
     "en": "english",
     "ta": "tamil",
@@ -52,12 +73,50 @@ WHISPER_LANG_MAP = {
 
 def text_to_speech(text: str, language: str = "en") -> str:
     """
-    Convert text to speech using gTTS.
-    Returns base64-encoded MP3 string.
+    Convert text to speech using Sarvam TTS (Bulbul v1).
+    Falls back to gTTS if Sarvam API is unavailable or fails.
+    Returns base64-encoded audio string.
     """
     if not text:
         return ""
 
+    # ── Try Sarvam TTS first ──────────────────────────────
+    if SARVAM_API_KEY:
+        lang_code = SARVAM_LANG_MAP.get(language, "en-IN")
+        try:
+            response = requests.post(
+                SARVAM_TTS_URL,
+                headers={
+                    "api-subscription-key": SARVAM_API_KEY,
+                    "Content-Type": "application/json",
+                },
+                json={
+                    "inputs": [text],
+                    "target_language_code": lang_code,
+                    "speaker": "meera",
+                    "pitch": 0,
+                    "pace": 1,
+                    "loudness": 1,
+                },
+                timeout=30,
+            )
+
+            if response.status_code == 200:
+                data = response.json()
+                # Sarvam returns base64-encoded WAV audio in the response
+                audio_b64 = data.get("audios", [None])[0]
+                if audio_b64:
+                    return "data:audio/wav;base64," + audio_b64
+                else:
+                    print("⚠️ Sarvam TTS: no audio in response")
+            else:
+                print(f"⚠️ Sarvam TTS error {response.status_code}: {response.text[:200]}")
+
+        except Exception as e:
+            print(f"⚠️ Sarvam TTS exception: {e}")
+
+    # ── Fallback to gTTS ──────────────────────────────────
+    print("ℹ️ Falling back to gTTS")
     lang_code = GTTS_LANG_MAP.get(language, "en")
 
     try:
@@ -67,7 +126,7 @@ def text_to_speech(text: str, language: str = "en") -> str:
         audio_buffer.seek(0)
         return "data:audio/mp3;base64," + base64.b64encode(audio_buffer.read()).decode("utf-8")
     except Exception as e:
-        print(f"TTS error: {e}")
+        print(f"gTTS error: {e}")
         try:
             tts = gTTS(text=text, lang="en", slow=False)
             audio_buffer = io.BytesIO()
