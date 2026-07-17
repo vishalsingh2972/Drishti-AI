@@ -52,7 +52,8 @@ F --> G[📍 Direction Detection]
 
 G --> H[🗣️ Voice Narration Engine]
 
-H --> I[gTTS Multilingual Speech]
+H --> I[Sarvam TTS (Bulbul v1)]
+I --> I2[🔄 gTTS Fallback]
 
 F --> J[🤖 Groq LLaMA 3]
 
@@ -150,7 +151,9 @@ Groq LLaMA 3 receives the current scene description and generates contextual res
 
 * 📍 **Directional Navigation:** Determines whether detected obstacles lie on the left, center, or right side of the user's path for intuitive navigation.
 
-* 🗣️ **Multilingual Voice Guidance:** Converts navigation instructions into natural speech across six Indian languages.
+* 🗣️ **AI-Powered Indian Language Voice Guidance:** Converts navigation instructions into natural speech across six Indian languages using **Sarvam TTS (Bulbul v1)** with automatic fallback to gTTS.
+
+* 🔄 **Sarvam AI Translation (Mayura):** Optional English-to-Indian-language translation module that can be integrated into the narration pipeline for real-time translation of scene descriptions.
 
 * 🤖 **Conversational Scene Intelligence:** Users can ask questions about their surroundings through voice or text using Groq-powered LLaMA 3.
 
@@ -202,19 +205,28 @@ This lightweight representation is then passed to Groq LLaMA 3 for conversationa
 
 ---
 
+### 5. Sarvam AI-Powered Voice & Translation
+
+Drishti AI optionally integrates **Sarvam AI's Bulbul v1 TTS model** for more natural Indian language voice output. When a `SARVAM_API_KEY` is configured, all navigation instructions are spoken using Sarvam's high-quality Indian-accent voices. If the API is unavailable, the system seamlessly falls back to gTTS.
+
+The **Mayura translation model** can also be used to translate English narration into any supported Indian language before speech synthesis, providing an alternative to the built-in multilingual narration templates.
+
+---
+
 # 🛠️ Technology Stack
 
-| Component           | Technology          |
-| ------------------- | ------------------- |
-| Frontend            | React               |
-| Backend             | FastAPI             |
-| Object Detection    | YOLOv8              |
-| Depth Estimation    | MiDaS DPT-Small     |
-| Conversational AI   | Groq LLaMA 3        |
-| Speech Recognition  | Whisper             |
-| Text-to-Speech      | gTTS                |
-| Backend Deployment  | Hugging Face Spaces |
-| Frontend Deployment | Vercel              |
+| Component               | Technology                          |
+| ----------------------- | ----------------------------------- |
+| Frontend                | React                               |
+| Backend                 | FastAPI                             |
+| Object Detection        | YOLOv8                              |
+| Depth Estimation        | MiDaS DPT-Small                     |
+| Text-to-Speech          | **Sarvam TTS (Bulbul v1)** + gTTS fallback |
+| Translation             | **Sarvam Translate (Mayura)** [Optional] |
+| Conversational AI       | Groq LLaMA 3                        |
+| Speech Recognition      | Whisper                             |
+| Backend Deployment      | Hugging Face Spaces                 |
+| Frontend Deployment     | Vercel                              |
 
 ---
 
@@ -229,7 +241,8 @@ Drishti-AI/
 ├── detect.py              # YOLOv8 inference
 ├── depth.py               # MiDaS depth estimation
 ├── narrate.py             # Scene summarization
-├── voice.py               # Text-to-Speech generation
+├── voice.py               # Sarvam TTS + gTTS fallback
+├── translate.py           # Sarvam Mayura translation [Optional]
 ├── chat.py                # Groq conversational AI
 ├── Dockerfile
 └── requirements.txt
@@ -257,7 +270,8 @@ package.json
 | `detect.py`            | Runs YOLOv8 inference and returns detected objects with confidence scores.             |
 | `depth.py`             | Estimates relative object depth using MiDaS DPT-Small.                                 |
 | `narrate.py`           | Merges object detection and depth results into human-readable navigation instructions. |
-| `voice.py`             | Generates multilingual speech using gTTS.                                              |
+| `voice.py`             | Generates multilingual speech using **Sarvam TTS (Bulbul v1)** with gTTS fallback.     |
+| `translate.py`         | Translates English text to Indian languages using **Sarvam Mayura** API.               |
 | `chat.py`              | Interfaces with Groq LLaMA 3 for contextual scene conversations.                       |
 | `Camera.jsx`           | Captures browser camera frames and streams them to the backend.                        |
 | `AlertOverlay.jsx`     | Displays detected objects, distances, and navigation cues over the live feed.          |
@@ -278,7 +292,7 @@ pip install -r requirements.txt
 python app.py
 ```
 
----
+> **Note:** Create a `backend/.env` file with your API keys (see `.env.example`). The app works without any keys — Sarvam features will use fallbacks automatically.
 
 ## Frontend
 
@@ -320,6 +334,8 @@ Configure secrets
 Deploy
 ```
 
+> **Required Secrets for Sarvam Features:** Add `SARVAM_API_KEY` to your Hugging Face Space secrets if you want Sarvam TTS and Translation to work in production.
+
 ---
 
 # 🚀 Future Enhancements
@@ -332,6 +348,7 @@ Deploy
 * Route planning with turn-by-turn navigation
 * Personalized obstacle prioritization
 * Haptic feedback support
+* Sarvam STT (Vaani) integration for Indian language speech recognition
 
 ---
 
