@@ -235,35 +235,41 @@ The **Mayura translation model** can also be used to translate English narration
 
 ```text
 Drishti-AI/
-
-├── backend/
 │
-├── app.py                 # FastAPI entry point
-├── detect.py              # YOLOv8 inference
-├── depth.py               # MiDaS depth estimation
-├── narrate.py             # Scene summarization
-├── voice.py               # Sarvam TTS + gTTS fallback
-├── translate.py           # Sarvam Mayura translation [Optional]
-├── chat.py                # Groq conversational AI
-├── Dockerfile
-└── requirements.txt
-
-frontend/
-
-├── public/
-
-├── src/
-
-│   ├── App.jsx
-
-│   └── components/
-
-│       ├── Camera.jsx
-│       ├── AlertOverlay.jsx
-│       ├── VoiceChat.jsx
-│       └── LanguageSelector.jsx
-
-package.json
+├── README.md
+├── LICENSE
+├── .gitignore
+│
+├── backend/
+│   ├── app.py                 # FastAPI entry point
+│   ├── detect.py              # YOLOv8 inference
+│   ├── depth.py               # MiDaS depth estimation
+│   ├── narrate.py             # Scene summarization
+│   ├── voice.py               # Sarvam TTS + gTTS fallback
+│   ├── translate.py           # Sarvam Mayura translation [Optional]
+│   ├── chat.py                # Groq conversational AI
+│   ├── Dockerfile
+│   ├── requirements.txt
+│   ├── .env                   # API keys (GROQ, SARVAM)
+│   └── README.md
+│
+├── frontend/
+│   ├── public/
+│   │   └── index.html
+│   ├── src/
+│   │   ├── index.js
+│   │   ├── App.jsx
+│   │   ├── App.css
+│   │   └── components/
+│   │       ├── Camera.jsx
+│   │       ├── AlertOverlay.jsx
+│   │       ├── VoiceChat.jsx
+│   │       └── LanguageSelector.jsx
+│   ├── .env                   # REACT_APP_API_URL
+│   ├── package.json
+│   └── .gitignore
+│
+└── package.json
 ```
 
 | Component              | Responsibility                                                                         |
