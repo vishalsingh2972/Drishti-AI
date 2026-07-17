@@ -52,8 +52,8 @@ F --> G[📍 Direction Detection]
 
 G --> H[🗣️ Voice Narration Engine]
 
-H --> I[Sarvam TTS (Bulbul v1)]
-I --> I2[🔄 gTTS Fallback]
+H --> I["Sarvam TTS (Bulbul v1)"]
+I --> I2["🔄 gTTS Fallback"]
 
 F --> J[🤖 Groq LLaMA 3]
 
