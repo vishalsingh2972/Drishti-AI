@@ -1,6 +1,6 @@
 # 👁️ Drishti AI
 
-### An AI-powered multimodal navigation companion that helps visually impaired users understand, navigate, and interact with the world through real-time computer vision, depth perception, and conversational AI.
+## AI-powered assistive navigation for visually impaired users.
 
 **Drishti AI** is a production-ready assistive navigation platform designed to improve independent mobility for visually impaired individuals.
 
